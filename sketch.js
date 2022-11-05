@@ -23,7 +23,8 @@ function draw() {
   let quadTree = new QuadTree(boundary, 4);
 
   for (let boid of boids) {
-    quadTree.insert(boid);
+    p = new Point(boid.position, boid);
+    quadTree.insert(p);
     boid.update();
     boid.show();
   }
