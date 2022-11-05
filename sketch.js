@@ -1,8 +1,6 @@
 const FLOCK_SIZE = 100;
 
 const boids = Array();
-let quadTree = null;
-let points = Array();
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -21,16 +19,16 @@ function draw() {
 
   // build a quadtree for this loop
   let boundary = new Rectangle(width / 2, height / 2, width / 2, height / 2);
-  let quadTree = new QuadTree(boundary, 4);
+  let qtree = new QuadTree(boundary, 4);
 
   for (let boid of boids) {
     p = new Point(boid.position.x, boid.position.y, boid);
-    quadTree.insert(p);
+    qtree.insert(p);
     boid.update();
     boid.show();
   }
 
-  quadTree.show();
+  qtree.show();
 
   // test the query code using the mouse
   range = new Circle(mouseX, mouseY, 100);
@@ -39,7 +37,7 @@ function draw() {
   stroke("green");
   circle(range.x, range.y, range.radius * 2);
 
-  points = quadTree.query(range);
+  let points = qtree.query(range);
   // console.log(points);
   if (points.length > 0) {
     strokeWeight(5);
