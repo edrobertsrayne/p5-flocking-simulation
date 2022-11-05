@@ -27,16 +27,44 @@ class Boid {
   }
 
   separation(others) {
+    if (others.length < 1) {
+      console.assert(
+        "No members of other array passed to separation function."
+      );
+      return;
+    }
     let acceleration = createVector(0, 0);
-    return acceleration;
   }
 
-  alignment(others) {
+  alignment(others, effectSize) {
+    if (others.length < 1) {
+      console.assert("No members of other array passed to alignment function.");
+      return;
+    }
+    if (effectSize === null) {
+      effectSize = 0.2;
+    }
+    let averageVelocity = createVector(0, 0);
+    for (let other of others) {
+      averageVelocity.add(other.data.velocity);
+    }
+    averageVelocity.div(others.length);
     let acceleration = createVector(0, 0);
-    return acceleration;
+    acceleration = p5.Vector.sub(averageVelocity, this.velocity);
+    acceleration.normalize();
+    acceleration.mult(effectSize);
+
+    this.acceleration.add(acceleration);
   }
 
   cohesion(others, effectSize) {
+    if (others.length < 1) {
+      console.assert("No members of other array passed to cohesion function.");
+      return;
+    }
+    if (effectSize === null) {
+      effectSize = 0.2;
+    }
     let acceleration = createVector(0, 0);
 
     // calculate the average position vectors of the

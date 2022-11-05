@@ -2,6 +2,9 @@ const FLOCK_SIZE = 100;
 let boids = Array();
 
 let perceptionSlider;
+let separationSlider;
+let cohesionSlider;
+let alignmentSlider;
 let resetButton;
 
 function createFlock() {
@@ -23,9 +26,20 @@ function setup() {
   perceptionSlider.position(10, 10);
   perceptionSlider.style("width", "80px");
 
+  separationSlider = createSlider(0, 1, 0.2, 0.01);
+  separationSlider.position(10, 40);
+  separationSlider.style("width", "80px");
+
+  cohesionSlider = createSlider(0, 1, 0.2, 0.01);
+  cohesionSlider.position(10, 70);
+  cohesionSlider.style("width", "80px");
+
+  alignmentSlider = createSlider(0, 1, 0.2, 0.01);
+  alignmentSlider.position(10, 100);
+  alignmentSlider.style("width", "80px");
+
   resetButton = createButton("Reset simulation");
   let size = resetButton.size();
-  console.log(size);
   resetButton.position(width - 10 - size.width, 10);
   resetButton.mousePressed(createFlock);
 
@@ -53,7 +67,8 @@ function draw() {
     others = qtree.query(range);
 
     if (others.length > 0) {
-      boid.cohesion(others, 1);
+      boid.cohesion(others, cohesionSlider.value());
+      boid.alignment(others, alignmentSlider.value());
     }
     boid.update();
     boid.show();
@@ -69,5 +84,20 @@ function draw() {
     "perception radius",
     perceptionSlider.x * 2 + perceptionSlider.width,
     perceptionSlider.y + 15
+  );
+  text(
+    "separation",
+    separationSlider.x * 2 + separationSlider.width,
+    separationSlider.y + 15
+  );
+  text(
+    "cohesion",
+    cohesionSlider.x * 2 + cohesionSlider.width,
+    cohesionSlider.y + 15
+  );
+  text(
+    "alignment",
+    alignmentSlider.x * 2 + alignmentSlider.width,
+    alignmentSlider.y + 15
   );
 }
