@@ -6,23 +6,37 @@ class Rectangle {
     this.height = height;
   }
 
-  contains(position) {
+  contains(point) {
     if (
-      position.x > this.x - this.width &&
-      position.x <= this.x + this.width &&
-      position.y > this.y - this.height &&
-      position.y <= this.y + this.height
+      point.x > this.x - this.width &&
+      point.x <= this.x + this.width &&
+      point.y > this.y - this.height &&
+      point.y <= this.y + this.height
     ) {
       return true;
     } else {
       return false;
     }
   }
+
+  intersects(rectangle) {
+    if (
+      this.x - this.width > rectangle.x + rectangle.width ||
+      this.y - this.height > rectangle.y + rectangle.height ||
+      this.x + this.width < rectangle.width - rectangle.width ||
+      this.y + this.height < rectangle.height - rectangle.height
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
 
 class Point {
   constructor(position, data) {
-    this.position = position;
+    this.x = position.x;
+    this.y = position.y;
     this.data = data;
   }
 }
@@ -61,7 +75,7 @@ class QuadTree {
   }
 
   insert(point) {
-    if (!this.boundary.contains(point.position)) {
+    if (!this.boundary.contains(point)) {
       return false;
     }
 
@@ -78,6 +92,33 @@ class QuadTree {
 
       return this.push(point);
     }
+  }
+
+  query(range) {
+    pointsInRange = Array();
+
+    // if no overalap return an empty array
+    if (!this.boundary.intersects(range)) {
+      return pointsInRange;
+    }
+
+    // add the points in this node
+    for (let p of this.points) {
+      if (range.contains(p)) {
+        pointsInRange.push(p);
+      }
+    }
+
+    if (this.children.length < 1) {
+      return pointsInRange;
+    }
+
+    // query child nodes
+    for (let c of this.children) {
+      pointsInRange.push(c.query(range));
+    }
+
+    return pointsInRange;
   }
 
   show() {
