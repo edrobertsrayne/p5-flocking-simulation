@@ -19,7 +19,7 @@ function draw() {
   background(0);
 
   // build a quadtree for this loop
-  let boundary = new Quadrant(width / 2, height / 2, width / 2, height / 2);
+  let boundary = new Rectangle(width / 2, height / 2, width / 2, height / 2);
   let quadTree = new QuadTree(boundary, 4);
 
   for (let boid of boids) {
