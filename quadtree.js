@@ -7,32 +7,58 @@ class Rectangle {
   }
 
   contains(point) {
-    if (
+    return (
       point.x > this.x - this.width &&
       point.x <= this.x + this.width &&
       point.y > this.y - this.height &&
       point.y <= this.y + this.height
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+    );
   }
 
   intersects(rectangle) {
+    let dx = Math.abs(this.x - rectangle.x);
+    let dy = Math.abs(this.y - rectangle.y);
     return !(
-      this.x + this.width < rectangle.x - rectangle.width ||
-      this.x - this.width > rectangle.x + rectangle.width ||
-      this.y + this.height < rectangle.y - rectangle.height ||
-      this.y - this.height > rectangle.y + rectangle.height
+      dx > this.width + rectangle.width || dy > this.height + rectangle.height
     );
   }
 }
 
+class Circle {
+  constructor(x, y, radius) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.rSquared = Math.pow(this.radius, 2);
+  }
+
+  contains(point) {
+    return (
+      Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2) <=
+      this.rSquared
+    );
+  }
+
+  intersects(rectangle) {
+    let dx = Math.abs(this.x - rectangle.x);
+    let dy = Math.abs(this.y - rectangle.y);
+
+    // treat as if a rectangle
+    if (
+      dx > this.radius + rectangle.width ||
+      dy > this.radius + rectangle.height
+    ) {
+      return false;
+    }
+    // there are probably some optimisations that I could make here.
+    return true;
+  }
+}
+
 class Point {
-  constructor(position, data) {
-    this.x = position.x;
-    this.y = position.y;
+  constructor(x, y, data) {
+    this.x = x;
+    this.y = y;
     this.data = data;
   }
 }
@@ -96,7 +122,7 @@ class QuadTree {
     }
 
     // if no overalap return an empty array
-    if (!this.boundary.intersects(range)) {
+    if (!range.intersects(this.boundary)) {
       return found;
     }
 
