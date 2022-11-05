@@ -29,28 +29,24 @@ function draw() {
   for (let boid of boids) {
     p = new Point(boid.position.x, boid.position.y, boid);
     qtree.insert(p);
+  }
+
+  for (let boid of boids) {
+    range = new Circle(
+      boid.position.x,
+      boid.position.y,
+      perceptionSlider.value()
+    );
+    others = qtree.query(range);
+
+    if (others.length > 0) {
+      boid.cohesion(others, 1);
+    }
     boid.update();
     boid.show();
   }
 
   qtree.show();
-
-  // test the query code using the mouse
-  range = new Circle(mouseX, mouseY, perceptionSlider.value());
-  //r = new Rectangle(mouseX, mouseY, 100, 100);
-  strokeWeight(1);
-  stroke("green");
-  circle(range.x, range.y, range.radius * 2);
-
-  let points = qtree.query(range);
-  // console.log(points);
-  if (points.length > 0) {
-    strokeWeight(5);
-    stroke("red");
-    for (let p of points) {
-      point(p.x, p.y);
-    }
-  }
 
   // slider labels
   textSize(15);

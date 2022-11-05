@@ -12,13 +12,45 @@ class Boid {
     if (this.position.y > height) this.position.y = 0;
   }
 
-  update() {
+  update(maxSpeed) {
+    if (!maxSpeed) {
+      maxSpeed = 1;
+    }
+    // update the position
     this.position.add(this.velocity);
     this.velocity.add(this.acceleration);
-    //this.acceleration.mult(0);
+    this.velocity.limit(1);
+    this.acceleration.mult(0);
 
     // wrap around the screen borders
     this.wrapBorders();
+  }
+
+  separation(others) {
+    let acceleration = createVector(0, 0);
+    return acceleration;
+  }
+
+  alignment(others) {
+    let acceleration = createVector(0, 0);
+    return acceleration;
+  }
+
+  cohesion(others, effectSize) {
+    let acceleration = createVector(0, 0);
+
+    // calculate the average position vectors of the
+    let averagePosition = createVector(0, 0);
+    for (let other of others) {
+      averagePosition.add(other.data.position);
+    }
+    averagePosition.div(others.length);
+
+    acceleration = p5.Vector.sub(averagePosition, this.position);
+    acceleration.normalize();
+    acceleration.mult(effectSize);
+
+    this.acceleration.add(acceleration);
   }
 
   show() {
