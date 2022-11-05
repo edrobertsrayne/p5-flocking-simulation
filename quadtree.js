@@ -20,16 +20,12 @@ class Rectangle {
   }
 
   intersects(rectangle) {
-    if (
+    return !(
+      this.x + this.width < rectangle.x - rectangle.width ||
       this.x - this.width > rectangle.x + rectangle.width ||
-      this.y - this.height > rectangle.y + rectangle.height ||
-      this.x + this.width < rectangle.width - rectangle.width ||
-      this.y + this.height < rectangle.height - rectangle.height
-    ) {
-      return false;
-    } else {
-      return true;
-    }
+      this.y + this.height < rectangle.y - rectangle.height ||
+      this.y - this.height > rectangle.y + rectangle.height
+    );
   }
 }
 
@@ -94,31 +90,27 @@ class QuadTree {
     }
   }
 
-  query(range) {
-    pointsInRange = Array();
+  query(range, found) {
+    if (!found) {
+      found = [];
+    }
 
     // if no overalap return an empty array
     if (!this.boundary.intersects(range)) {
-      return pointsInRange;
+      return found;
     }
 
     // add the points in this node
     for (let p of this.points) {
       if (range.contains(p)) {
-        pointsInRange.push(p);
+        found.push(p);
       }
     }
-
-    if (this.children.length < 1) {
-      return pointsInRange;
-    }
-
     // query child nodes
-    for (let c of this.children) {
-      pointsInRange.push(c.query(range));
+    for (let child of this.children) {
+      child.query(range, found);
     }
-
-    return pointsInRange;
+    return found;
   }
 
   show() {
