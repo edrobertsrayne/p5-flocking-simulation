@@ -21,9 +21,8 @@ class Rectangle {
 }
 
 class Point {
-  constructor(x, y, data) {
-    this.x = x;
-    this.y = y;
+  constructor(position, data) {
+    this.position = position;
     this.data = data;
   }
 }
