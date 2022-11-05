@@ -1,14 +1,11 @@
 const FLOCK_SIZE = 100;
-const boids = Array();
+let boids = Array();
 
 let perceptionSlider;
+let resetButton;
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-
-  perceptionSlider = createSlider(10, 500, 100);
-  perceptionSlider.position(10, 10);
-  perceptionSlider.style("width", "80px");
+function createFlock() {
+  boids = [];
 
   // create a number of randomly distributed boids
   for (let i = 0; i < FLOCK_SIZE; i++) {
@@ -17,6 +14,22 @@ function setup() {
     let v = p5.Vector.random2D();
     boids.push(new Boid(p, v));
   }
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  perceptionSlider = createSlider(10, 500, 100);
+  perceptionSlider.position(10, 10);
+  perceptionSlider.style("width", "80px");
+
+  resetButton = createButton("Reset simulation");
+  let size = resetButton.size();
+  console.log(size);
+  resetButton.position(width - 10 - size.width, 10);
+  resetButton.mousePressed(createFlock);
+
+  createFlock();
 }
 
 function draw() {
