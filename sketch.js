@@ -1,9 +1,14 @@
 const FLOCK_SIZE = 100;
-
 const boids = Array();
+
+let perceptionSlider;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  perceptionSlider = createSlider(10, 500, 100);
+  perceptionSlider.position(10, 10);
+  perceptionSlider.style("width", "80px");
 
   // create a number of randomly distributed boids
   for (let i = 0; i < FLOCK_SIZE; i++) {
@@ -31,7 +36,7 @@ function draw() {
   qtree.show();
 
   // test the query code using the mouse
-  range = new Circle(mouseX, mouseY, 100);
+  range = new Circle(mouseX, mouseY, perceptionSlider.value());
   //r = new Rectangle(mouseX, mouseY, 100, 100);
   strokeWeight(1);
   stroke("green");
@@ -46,4 +51,14 @@ function draw() {
       point(p.x, p.y);
     }
   }
+
+  // slider labels
+  textSize(15);
+  noStroke();
+  fill(255);
+  text(
+    "perception radius",
+    perceptionSlider.x * 2 + perceptionSlider.width,
+    perceptionSlider.y + 15
+  );
 }
