@@ -7,6 +7,8 @@ let cohesionSlider;
 let alignmentSlider;
 let resetButton;
 
+let sliders = [];
+
 function createFlock() {
   boids = [];
 
@@ -23,20 +25,18 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   perceptionSlider = createSlider(10, 500, 100);
-  perceptionSlider.position(10, 10);
-  perceptionSlider.style("width", "80px");
+  sliders.push({ slider: perceptionSlider, label: "perception radius" });
 
   separationSlider = createSlider(0, 2, 1, 0.01);
-  separationSlider.position(10, 40);
-  separationSlider.style("width", "80px");
+  sliders.push({ slider: separationSlider, label: "separation" });
 
   cohesionSlider = createSlider(0, 2, 1, 0.01);
-  cohesionSlider.position(10, 70);
-  cohesionSlider.style("width", "80px");
+  sliders.push({ slider: cohesionSlider, label: "cohesion" });
 
   alignmentSlider = createSlider(0, 2, 1, 0.01);
-  alignmentSlider.position(10, 100);
-  alignmentSlider.style("width", "80px");
+  sliders.push({ slider: alignmentSlider, label: "alignment" });
+
+  sliders.forEach(setSliderProperties);
 
   resetButton = createButton("Reset simulation");
   let size = resetButton.size();
@@ -44,6 +44,19 @@ function setup() {
   resetButton.mousePressed(createFlock);
 
   createFlock();
+}
+
+function setSliderProperties(value, index, array) {
+  value.slider.position(10, 10 + index * 30);
+  value.slider.style("width", "80px");
+}
+
+function displaySliderLabels(value, index, array) {
+  text(
+    value.label.concat(" (", value.slider.value(), ")"),
+    value.slider.x * 2 + value.slider.width,
+    value.slider.y + 15
+  );
 }
 
 function draw() {
@@ -75,30 +88,12 @@ function draw() {
     boid.show();
   }
 
-  qtree.show();
-
   // slider labels
   textSize(15);
   noStroke();
   fill(255);
-  text(
-    "perception radius",
-    perceptionSlider.x * 2 + perceptionSlider.width,
-    perceptionSlider.y + 15
-  );
-  text(
-    "separation",
-    separationSlider.x * 2 + separationSlider.width,
-    separationSlider.y + 15
-  );
-  text(
-    "cohesion",
-    cohesionSlider.x * 2 + cohesionSlider.width,
-    cohesionSlider.y + 15
-  );
-  text(
-    "alignment",
-    alignmentSlider.x * 2 + alignmentSlider.width,
-    alignmentSlider.y + 15
-  );
+  sliders.forEach(displaySliderLabels);
+
+  // framerate
+  text(frameRate().toFixed(2), width - 50, 50);
 }
