@@ -1,10 +1,12 @@
 const FLOCK_SIZE = 100;
 let boids = Array();
 
+let flockSizeSlider;
 let perceptionSlider;
 let separationSlider;
 let cohesionSlider;
 let alignmentSlider;
+let edgeAvoidSlider;
 let resetButton;
 
 let sliders = [];
@@ -13,7 +15,7 @@ function createFlock() {
   boids = [];
 
   // create a number of randomly distributed boids
-  for (let i = 0; i < FLOCK_SIZE; i++) {
+  for (let i = 0; i < flockSizeSlider.value(); i++) {
     let p = createVector(random(width), random(height));
     //let v = createVector(0, 0);
     let v = p5.Vector.random2D();
@@ -24,17 +26,23 @@ function createFlock() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  perceptionSlider = createSlider(10, 500, 100);
+  flockSizeSlider = createSlider(10, 1000, FLOCK_SIZE);
+  sliders.push({ slider: flockSizeSlider, label: "flock size" });
+
+  perceptionSlider = createSlider(5, 500, 50);
   sliders.push({ slider: perceptionSlider, label: "perception radius" });
 
-  separationSlider = createSlider(0, 2, 1, 0.01);
+  separationSlider = createSlider(0, 2, 0.8, 0.01);
   sliders.push({ slider: separationSlider, label: "separation" });
 
-  cohesionSlider = createSlider(0, 2, 1, 0.01);
+  cohesionSlider = createSlider(0, 2, 0.8, 0.01);
   sliders.push({ slider: cohesionSlider, label: "cohesion" });
 
-  alignmentSlider = createSlider(0, 2, 1, 0.01);
+  alignmentSlider = createSlider(0, 2, 0.8, 0.01);
   sliders.push({ slider: alignmentSlider, label: "alignment" });
+
+  edgeAvoidSlider = createSlider(0, 1, 0, 0.01);
+  sliders.push({ slider: edgeAvoidSlider, label: "edge avoidance" });
 
   sliders.forEach(setSliderProperties);
 
@@ -84,6 +92,24 @@ function draw() {
       boid.alignment(others, alignmentSlider.value());
       boid.separation(others, separationSlider.value());
     }
+
+    // edge avoid
+    let steer = createVector(0);
+    let desired = createVector(0);
+    if (boid.position.x < 25) {
+      desired.add(boid.maxSpeed, boid.velocity.y);
+    } else if (boid.position.x > width - 25) {
+      desired.add(-boid.maxSpeed, boid.velocity.y);
+    }
+    if (boid.position.y < 25) {
+      desired.add(boid.velocity.x, boid.maxSpeed);
+    } else if (boid.position.y + 25 < height) {
+      desired.add(boid.velocity.x, -boid.maxSpeed);
+    }
+    steer = p5.Vector.sub(desired, boid.velocity);
+    steer.mult(edgeAvoidSlider.value());
+    boid.acceleration.add(steer);
+
     boid.update();
     boid.show();
   }
@@ -95,5 +121,11 @@ function draw() {
   sliders.forEach(displaySliderLabels);
 
   // framerate
-  text(frameRate().toFixed(2), width - 50, 50);
+  text(frameRate().toFixed(2), width - 50, 30 + resetButton.size().height);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  let size = resetButton.size();
+  resetButton.position(width - 10 - size.width, 10);
 }
