@@ -3,6 +3,8 @@ class Boid {
     this.position = position;
     this.velocity = velocity;
     this.acceleration = createVector(0, 0);
+    this.maxSpeed = 5;
+    this.maxAcceleration = 0.2;
   }
 
   wrapBorders() {
@@ -12,10 +14,17 @@ class Boid {
     if (this.position.y > height) this.position.y = 0;
   }
 
-  update(maxSpeed) {
-    if (!maxSpeed) {
-      maxSpeed = 1;
-    }
+  setMaxSpeed(maxSpeed) {
+    this.maxSpeed = maxSpeed;
+  }
+
+  setMaxAcceleration(maxAcceleration) {
+    this.maxAcceleration = maxAcceleration;
+  }
+
+  update() {
+    // limit the accleration
+    this.acceleration.limit(this.maxAcceleration);
     // update the position
     this.position.add(this.velocity);
     this.velocity.add(this.acceleration);
@@ -26,14 +35,31 @@ class Boid {
     this.wrapBorders();
   }
 
-  separation(others) {
+  separation(others, effectSize) {
     if (others.length < 1) {
       console.assert(
         "No members of other array passed to separation function."
       );
       return;
     }
-    let acceleration = createVector(0, 0);
+    if (effectSize === null) {
+      effectSize = 0.2;
+    }
+    let weightedPosition = createVector(0, 0);
+    let desired = createVector(0, 0);
+    for (let other of others) {
+      weightedPosition = p5.Vector.sub(other.data.position, this.position);
+      if (weightedPosition.mag() > 0) {
+        weightedPosition.div(weightedPosition.mag());
+      }
+      desired.add(weightedPosition);
+    }
+    desired.normalize();
+    desired.mult(this.maxSpeed);
+
+    let steering = p5.Vector.sub(this.velocity, desired);
+    steering.mult(effectSize);
+    this.acceleration.add(steering);
   }
 
   alignment(others, effectSize) {
@@ -48,13 +74,12 @@ class Boid {
     for (let other of others) {
       averageVelocity.add(other.data.velocity);
     }
-    averageVelocity.div(others.length);
-    let acceleration = createVector(0, 0);
-    acceleration = p5.Vector.sub(averageVelocity, this.velocity);
-    acceleration.normalize();
-    acceleration.mult(effectSize);
+    averageVelocity.normalize();
+    averageVelocity.mult(this.maxSpeed);
+    let steering = p5.Vector.sub(averageVelocity, this.velocity);
+    steering.mult(effectSize);
 
-    this.acceleration.add(acceleration);
+    this.acceleration.add(steering);
   }
 
   cohesion(others, effectSize) {
@@ -65,7 +90,7 @@ class Boid {
     if (effectSize === null) {
       effectSize = 0.2;
     }
-    let acceleration = createVector(0, 0);
+    let desired = createVector(0, 0);
 
     // calculate the average position vectors of the
     let averagePosition = createVector(0, 0);
@@ -74,11 +99,13 @@ class Boid {
     }
     averagePosition.div(others.length);
 
-    acceleration = p5.Vector.sub(averagePosition, this.position);
-    acceleration.normalize();
-    acceleration.mult(effectSize);
+    desired = p5.Vector.sub(averagePosition, this.position);
+    desired.normalize();
+    desired.mult(this.maxSpeed);
 
-    this.acceleration.add(acceleration);
+    let steering = p5.Vector.sub(desired, this.velocity);
+    steering.mult(effectSize);
+    this.acceleration.add(steering);
   }
 
   show() {

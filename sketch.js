@@ -26,15 +26,15 @@ function setup() {
   perceptionSlider.position(10, 10);
   perceptionSlider.style("width", "80px");
 
-  separationSlider = createSlider(0, 1, 0.2, 0.01);
+  separationSlider = createSlider(0, 2, 1, 0.01);
   separationSlider.position(10, 40);
   separationSlider.style("width", "80px");
 
-  cohesionSlider = createSlider(0, 1, 0.2, 0.01);
+  cohesionSlider = createSlider(0, 2, 1, 0.01);
   cohesionSlider.position(10, 70);
   cohesionSlider.style("width", "80px");
 
-  alignmentSlider = createSlider(0, 1, 0.2, 0.01);
+  alignmentSlider = createSlider(0, 2, 1, 0.01);
   alignmentSlider.position(10, 100);
   alignmentSlider.style("width", "80px");
 
@@ -69,6 +69,7 @@ function draw() {
     if (others.length > 0) {
       boid.cohesion(others, cohesionSlider.value());
       boid.alignment(others, alignmentSlider.value());
+      boid.separation(others, separationSlider.value());
     }
     boid.update();
     boid.show();
