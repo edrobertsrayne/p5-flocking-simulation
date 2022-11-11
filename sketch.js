@@ -96,14 +96,16 @@ function draw() {
     // edge avoid
     let steer = createVector(0);
     let desired = createVector(0);
-    if (boid.position.x < 25) {
+    let EDGE_WIDTH = 100;
+    if (boid.position.x < EDGE_WIDTH) {
       desired.add(boid.maxSpeed, boid.velocity.y);
-    } else if (boid.position.x > width - 25) {
+    } else if (boid.position.x > width - EDGE_WIDTH) {
       desired.add(-boid.maxSpeed, boid.velocity.y);
     }
-    if (boid.position.y < 25) {
+
+    if (boid.position.y < EDGE_WIDTH) {
       desired.add(boid.velocity.x, boid.maxSpeed);
-    } else if (boid.position.y + 25 < height) {
+    } else if (boid.position.y > height - EDGE_WIDTH) {
       desired.add(boid.velocity.x, -boid.maxSpeed);
     }
     steer = p5.Vector.sub(desired, boid.velocity);
