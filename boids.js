@@ -108,6 +108,16 @@ class Boid {
     this.acceleration.add(steering);
   }
 
+  seek(target, effectSize) {
+    let desired = p5.Vector.sub(target, this.position);
+    desired.normalize();
+    desired.mult(this.maxSpeed);
+    let steer = p5.Vector.sub(desired, this.velocity);
+    steer.mult(effectSize);
+    steer.limit(this.maxAcceleration);
+    this.acceleration.add(steer);
+  }
+
   show() {
     strokeWeight(1);
     stroke(255);

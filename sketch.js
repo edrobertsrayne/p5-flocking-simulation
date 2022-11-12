@@ -8,6 +8,7 @@ let cohesionSlider;
 let alignmentSlider;
 let edgeAvoidSlider;
 let resetButton;
+let seekSlider;
 
 let sliders = [];
 
@@ -44,6 +45,9 @@ function setup() {
   edgeAvoidSlider = createSlider(0, 1, 0, 0.01);
   sliders.push({ slider: edgeAvoidSlider, label: "edge avoidance" });
 
+  seekSlider = createSlider(0, 1, 0, 0.01);
+  sliders.push({ slider: seekSlider, label: "seek the mouse" });
+
   sliders.forEach(setSliderProperties);
 
   resetButton = createButton("Reset simulation");
@@ -79,6 +83,8 @@ function draw() {
     qtree.insert(p);
   }
 
+  let mouseTarget = createVector(mouseX, mouseY);
+
   for (let boid of boids) {
     range = new Circle(
       boid.position.x,
@@ -111,6 +117,9 @@ function draw() {
     steer = p5.Vector.sub(desired, boid.velocity);
     steer.mult(edgeAvoidSlider.value());
     boid.acceleration.add(steer);
+
+    // mouse seek
+    boid.seek(mouseTarget, seekSlider.value());
 
     boid.update();
     boid.show();
