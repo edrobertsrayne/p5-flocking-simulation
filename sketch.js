@@ -1,6 +1,7 @@
 const FLOCK_SIZE = 50;
 let boids = Array();
 let predators = Array();
+let obstacles = Array();
 
 let debug = false;
 
@@ -14,6 +15,13 @@ let resetButton;
 let seekSlider;
 
 let sliders = [];
+
+function createObstacle() {
+  let x = random(0, width);
+  let y = random(0, height);
+  let r = random(50, 200);
+  return new Obstacle(x, y, r);
+}
 
 function createBoid() {
   let p = createVector(random(width), random(height));
@@ -67,6 +75,8 @@ function setup() {
 
   createFlock();
 
+  obstacles.push(createObstacle());
+
   let p = createVector(random(width), random(height));
   let v = p5.Vector.random2D().mult(2);
   let predator = new Predator(p, v);
@@ -97,6 +107,10 @@ function draw() {
   }
   while (boids.length > flockSizeSlider.value()) {
     boids.pop();
+  }
+
+  for (let obstacle of obstacles) {
+    obstacle.show();
   }
 
   calculateBoids();
@@ -178,6 +192,8 @@ function calculateBoids() {
 function calculatePredators() {
   for (let predator of predators) {
     let force = createVector(0);
+
+    force = predator.collision(obstacles);
 
     if (predator.target == null) {
       // if I don't have a target, 0.1% chance of acquiring one otherwise keep wandering

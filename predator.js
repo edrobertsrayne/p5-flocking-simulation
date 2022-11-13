@@ -4,6 +4,7 @@ class Predator extends Vehicle {
     this.target = null;
     this.feedingRadius = 100;
     this.defaultMaxSpeed = this.maxSpeed;
+    this.radius = 10;
   }
 
   show() {

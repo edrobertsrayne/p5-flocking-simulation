@@ -7,6 +7,7 @@ class Vehicle {
     this.maxAcceleration = 0.5;
     this.mass = 1;
     this.drift = this.velocity.copy().normalize();
+    this.radius = 5;
   }
 
   wrap() {
@@ -80,6 +81,18 @@ class Vehicle {
     return this.seek(target);
   }
 
+  collision(obstacles) {
+    let path = this.velocity.copy().mult(200);
+    if (debug) {
+      stroke("green");
+      push();
+      translate(this.position.x, this.position.y);
+      rotate(this.velocity.heading());
+      rect(0, -this.radius, path.mag(), this.radius * 2);
+      pop();
+    }
+    return createVector(0);
+  }
   edges(margin) {
     if (margin === undefined) {
       margin = 50;
