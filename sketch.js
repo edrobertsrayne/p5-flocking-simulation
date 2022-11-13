@@ -26,9 +26,7 @@ function createFlock() {
   }
 }
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-
+function createSliders() {
   flockSizeSlider = createSlider(10, 1000, FLOCK_SIZE);
   sliders.push({ slider: flockSizeSlider, label: "flock size" });
 
@@ -56,6 +54,12 @@ function setup() {
   let size = resetButton.size();
   resetButton.position(width - 10 - size.width, 10);
   resetButton.mousePressed(createFlock);
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  createSliders();
 
   createFlock();
 

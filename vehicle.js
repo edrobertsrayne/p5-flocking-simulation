@@ -31,8 +31,16 @@ class Vehicle {
   pursue(target) {
     console.assert(target instanceof Vehicle);
 
+    let ahead = dist(
+      this.position.x,
+      this.position.y,
+      target.position.x,
+      target.position.y
+    );
+    ahead /= this.velocity.mag();
+
     let position = target.position.copy();
-    position.add(target.velocity.copy().mult(50));
+    position.add(target.velocity.copy().mult(ahead));
 
     if (debug) {
       stroke("green");
