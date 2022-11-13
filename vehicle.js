@@ -4,7 +4,7 @@ class Vehicle {
     this.velocity = velocity;
     this.acceleration = createVector(0, 0);
     this.maxSpeed = 1;
-    this.maxAcceleration = 0.2;
+    this.maxAcceleration = 0.5;
     this.mass = 1;
     this.drift = this.velocity.copy().normalize();
   }

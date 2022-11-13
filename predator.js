@@ -2,6 +2,7 @@ class Predator extends Vehicle {
   constructor(position, velocity) {
     super(position, velocity);
     this.target = null;
+    this.feedingRadius = 100;
   }
 
   show() {
@@ -14,6 +15,12 @@ class Predator extends Vehicle {
     translate(this.position.x, this.position.y);
     rotate(this.velocity.heading());
     triangle(20, 0, -20, 10, -20, -10);
+
+    if (debug) {
+      noFill();
+      stroke("darkred");
+      circle(0, 0, this.feedingRadius * 2);
+    }
     pop();
   }
 }

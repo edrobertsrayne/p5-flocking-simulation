@@ -66,8 +66,7 @@ function setup() {
   let p = createVector(random(width), random(height));
   let v = p5.Vector.random2D().mult(2);
   let predator = new Predator(p, v);
-  predator.maxSpeed = 2;
-  predator.mass = 5;
+  predator.maxSpeed = 1.5;
   predator.maxAcceleration = 0.1;
   predators.push(predator);
 }
@@ -88,6 +87,20 @@ function displaySliderLabels(value, index, array) {
 function draw() {
   background(0);
 
+  calculateBoids();
+  calculatePredators();
+
+  // slider labels
+  textSize(15);
+  noStroke();
+  fill(255);
+  sliders.forEach(displaySliderLabels);
+
+  // framerate
+  text(frameRate().toFixed(2), width - 50, 30 + resetButton.size().height);
+}
+
+function calculateBoids() {
   // build a quadtree for this loop
   let boundary = new Rectangle(width / 2, height / 2, width / 2, height / 2);
   let qtree = new QuadTree(boundary, 4);
@@ -114,13 +127,9 @@ function draw() {
     }
     others = qtree.query(range);
 
-    // flocking behaviours
-    if (others.length > 0) {
-      force.add(boid.cohesion(others).mult(cohesionSlider.value()));
-      force.add(boid.alignment(others).mult(alignmentSlider.value()));
-      force.add(boid.separation(others).mult(separationSlider.value()));
-    }
+    let runAway = false;
 
+    // if there's a predator nearby, run away!
     for (let predator of predators) {
       if (
         dist(
@@ -128,11 +137,21 @@ function draw() {
           boid.position.y,
           predator.position.x,
           predator.position.y
-        ) < 100
+        ) < predator.feedingRadius
       ) {
         force.add(boid.flee(predator));
+        force.add(boid.avoid(predator.position).mult(2));
+        runAway = true;
       }
     }
+
+    // otherwise calculate flocking behaviours
+    if (others.length > 0 && runAway == false) {
+      force.add(boid.cohesion(others).mult(cohesionSlider.value()));
+      force.add(boid.alignment(others).mult(alignmentSlider.value()));
+      force.add(boid.separation(others).mult(separationSlider.value()));
+    }
+
     // edge avoid and seek
     //force.add(boid.edges().mult(0.2));
     if (seekSlider.value() != 0) {
@@ -143,7 +162,9 @@ function draw() {
     boid.wrap();
     boid.show();
   }
+}
 
+function calculatePredators() {
   for (let predator of predators) {
     let force = createVector(0);
     if (predator.target == null) {
@@ -161,7 +182,7 @@ function draw() {
           predator.position.y,
           predator.target.position.x,
           predator.target.position.y
-        ) < 100
+        ) < predator.feedingRadius
       ) {
         console.log("Gotcha!");
         predator.target = null;
@@ -175,15 +196,6 @@ function draw() {
     predator.wrap();
     predator.show();
   }
-
-  // slider labels
-  textSize(15);
-  noStroke();
-  fill(255);
-  sliders.forEach(displaySliderLabels);
-
-  // framerate
-  text(frameRate().toFixed(2), width - 50, 30 + resetButton.size().height);
 }
 
 function windowResized() {
