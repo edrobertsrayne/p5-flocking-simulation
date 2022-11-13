@@ -15,14 +15,18 @@ let seekSlider;
 
 let sliders = [];
 
+function createBoid() {
+  let p = createVector(random(width), random(height));
+  let v = p5.Vector.random2D();
+  boids.push(new Boid(p, v));
+}
+
 function createFlock() {
   boids = [];
 
   // create a number of randomly distributed boids
   for (let i = 0; i < flockSizeSlider.value(); i++) {
-    let p = createVector(random(width), random(height));
-    let v = p5.Vector.random2D();
-    boids.push(new Boid(p, v));
+    createBoid();
   }
 }
 
@@ -86,6 +90,13 @@ function displaySliderLabels(value, index, array) {
 
 function draw() {
   background(0);
+
+  while (boids.length < flockSizeSlider.value()) {
+    createBoid();
+  }
+  while (boids.length > flockSizeSlider.value()) {
+    boids.pop();
+  }
 
   calculateBoids();
   calculatePredators();
@@ -184,13 +195,14 @@ function calculatePredators() {
           predator.position.y,
           predator.target.position.x,
           predator.target.position.y
-        ) < predator.feedingRadius
+        ) <
+        predator.feedingRadius / 2
       ) {
         if (debug) {
           console.log("Gotcha!");
-          boids.splice(boids.indexOf(predator.target), 1);
-          flockSizeSlider.value(boids.length);
         }
+        boids.splice(boids.indexOf(predator.target), 1);
+        flockSizeSlider.value(boids.length);
         predator.target = null;
       } else {
         force = predator.pursue(predator.target);
