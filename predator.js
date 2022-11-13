@@ -3,6 +3,7 @@ class Predator extends Vehicle {
     super(position, velocity);
     this.target = null;
     this.feedingRadius = 100;
+    this.defaultMaxSpeed = this.maxSpeed;
   }
 
   show() {
@@ -22,5 +23,14 @@ class Predator extends Vehicle {
       circle(0, 0, this.feedingRadius * 2);
     }
     pop();
+  }
+  update(force) {
+    let maxSpeed;
+    if (this.target != null) {
+      this.maxSpeed = this.defaultMaxSpeed * 2;
+    } else {
+      this.maxSpeed = this.defaultMaxSpeed;
+    }
+    super.update(force);
   }
 }

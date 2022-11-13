@@ -2,7 +2,7 @@ const FLOCK_SIZE = 50;
 let boids = Array();
 let predators = Array();
 
-const debug = true;
+let debug = false;
 
 let flockSizeSlider;
 let perceptionSlider;
@@ -66,7 +66,7 @@ function setup() {
   let p = createVector(random(width), random(height));
   let v = p5.Vector.random2D().mult(2);
   let predator = new Predator(p, v);
-  predator.maxSpeed = 1.5;
+  predator.defaultMaxSpeed = 1.5;
   predator.maxAcceleration = 0.1;
   predators.push(predator);
 }
@@ -172,7 +172,7 @@ function calculatePredators() {
         predator.target = random(boids);
         if (debug) {
           console.log("target acquired");
-          console.log(predator.target);
+          console.log(boids.indexOf(predator.target));
         }
       } else {
         force = predator.wander();
@@ -188,6 +188,8 @@ function calculatePredators() {
       ) {
         if (debug) {
           console.log("Gotcha!");
+          boids.splice(boids.indexOf(predator.target), 1);
+          flockSizeSlider.value(boids.length);
         }
         predator.target = null;
       } else {
