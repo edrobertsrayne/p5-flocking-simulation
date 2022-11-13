@@ -170,8 +170,10 @@ function calculatePredators() {
     if (predator.target == null) {
       if (random() < 0.001) {
         predator.target = random(boids);
-        console.log("target acquired");
-        console.log(predator.target);
+        if (debug) {
+          console.log("target acquired");
+          console.log(predator.target);
+        }
       } else {
         force = predator.wander();
       }
@@ -184,7 +186,9 @@ function calculatePredators() {
           predator.target.position.y
         ) < predator.feedingRadius
       ) {
-        console.log("Gotcha!");
+        if (debug) {
+          console.log("Gotcha!");
+        }
         predator.target = null;
       } else {
         force = predator.pursue(predator.target);
