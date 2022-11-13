@@ -1,5 +1,8 @@
 const FLOCK_SIZE = 100;
 let boids = Array();
+let predators = Array();
+
+const debug = true;
 
 let flockSizeSlider;
 let perceptionSlider;
@@ -18,7 +21,6 @@ function createFlock() {
   // create a number of randomly distributed boids
   for (let i = 0; i < flockSizeSlider.value(); i++) {
     let p = createVector(random(width), random(height));
-    //let v = createVector(0, 0);
     let v = p5.Vector.random2D();
     boids.push(new Boid(p, v));
   }
@@ -45,7 +47,7 @@ function setup() {
   edgeAvoidSlider = createSlider(0, 1, 0, 0.01);
   sliders.push({ slider: edgeAvoidSlider, label: "edge avoidance" });
 
-  seekSlider = createSlider(0, 1, 0, 0.01);
+  seekSlider = createSlider(-1, 1, 0, 0.01);
   sliders.push({ slider: seekSlider, label: "seek the mouse" });
 
   sliders.forEach(setSliderProperties);
@@ -56,6 +58,11 @@ function setup() {
   resetButton.mousePressed(createFlock);
 
   createFlock();
+
+  let p = createVector(random(width), random(height));
+  let v = p5.Vector.random2D();
+  let predator = new Predator(p, v);
+  predators.push(predator);
 }
 
 function setSliderProperties(value, index, array) {
@@ -93,36 +100,33 @@ function draw() {
     );
     others = qtree.query(range);
 
+    let force = createVector(0);
     if (others.length > 0) {
-      boid.cohesion(others, cohesionSlider.value());
-      boid.alignment(others, alignmentSlider.value());
-      boid.separation(others, separationSlider.value());
+      force.add(boid.cohesion(others).mult(cohesionSlider.value()));
+      force.add(boid.alignment(others).mult(alignmentSlider.value()));
+      force.add(boid.separation(others).mult(separationSlider.value()));
     }
-
+    /*
     // edge avoid
-    let steer = createVector(0);
-    let desired = createVector(0);
-    let EDGE_WIDTH = 100;
-    if (boid.position.x < EDGE_WIDTH) {
-      desired.add(boid.maxSpeed, boid.velocity.y);
-    } else if (boid.position.x > width - EDGE_WIDTH) {
-      desired.add(-boid.maxSpeed, boid.velocity.y);
-    }
-
-    if (boid.position.y < EDGE_WIDTH) {
-      desired.add(boid.velocity.x, boid.maxSpeed);
-    } else if (boid.position.y > height - EDGE_WIDTH) {
-      desired.add(boid.velocity.x, -boid.maxSpeed);
-    }
-    steer = p5.Vector.sub(desired, boid.velocity);
-    steer.mult(edgeAvoidSlider.value());
-    boid.acceleration.add(steer);
 
     // mouse seek
     boid.seek(mouseTarget, seekSlider.value());
+*/
+    if (seekSlider.value() != 0) {
+      force.add(boid.seek(mouseTarget).mult(seekSlider.value()));
+    }
 
-    boid.update();
+    boid.update(force);
+    boid.wrap();
     boid.show();
+  }
+
+  for (let predator of predators) {
+    let force = predator.wander();
+    force.add(predator.edges().mult(0.2));
+    predator.update(force);
+    predator.wrap();
+    predator.show();
   }
 
   // slider labels
