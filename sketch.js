@@ -91,6 +91,7 @@ function displaySliderLabels(value, index, array) {
 function draw() {
   background(0);
 
+  // update the flock size if required
   while (boids.length < flockSizeSlider.value()) {
     createBoid();
   }
@@ -112,10 +113,9 @@ function draw() {
 }
 
 function calculateBoids() {
-  // build a quadtree for this loop
+  // build a quadtree for this loop and populate it
   let boundary = new Rectangle(width / 2, height / 2, width / 2, height / 2);
   let qtree = new QuadTree(boundary, 4);
-
   for (let boid of boids) {
     p = new Point(boid.position.x, boid.position.y, boid);
     qtree.insert(p);
@@ -126,6 +126,7 @@ function calculateBoids() {
   for (let boid of boids) {
     let force = createVector(0);
 
+    // find the nearby boids to use in flocking calculations
     range = new Circle(
       boid.position.x,
       boid.position.y,
@@ -138,9 +139,8 @@ function calculateBoids() {
     }
     others = qtree.query(range);
 
-    let runAway = false;
-
     // if there's a predator nearby, run away!
+    let runAway = false;
     for (let predator of predators) {
       if (
         dist(
@@ -178,7 +178,9 @@ function calculateBoids() {
 function calculatePredators() {
   for (let predator of predators) {
     let force = createVector(0);
+
     if (predator.target == null) {
+      // if I don't have a target, 0.1% chance of acquiring one otherwise keep wandering
       if (random() < 0.001) {
         predator.target = random(boids);
         if (debug) {
@@ -189,6 +191,7 @@ function calculatePredators() {
         force = predator.wander();
       }
     } else {
+      // if close enough (half feeding range) consume the boid otherwise continue the chase
       if (
         dist(
           predator.position.x,
@@ -209,7 +212,7 @@ function calculatePredators() {
       }
     }
 
-    // force.add(predator.edges().mult(0.2));
+    // update and display the predator
     predator.update(force);
     predator.wrap();
     predator.show();
