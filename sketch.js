@@ -64,6 +64,7 @@ function setup() {
   let predator = new Predator(p, v);
   predator.maxSpeed = 2;
   predator.mass = 5;
+  predator.maxAcceleration = 0.1;
   predators.push(predator);
 }
 
@@ -117,7 +118,16 @@ function draw() {
     }
 
     for (let predator of predators) {
-      force.add(boid.flee(predator));
+      if (
+        dist(
+          boid.position.x,
+          boid.position.y,
+          predator.position.x,
+          predator.position.y
+        ) < 100
+      ) {
+        force.add(boid.flee(predator));
+      }
     }
     // edge avoid and seek
     //force.add(boid.edges().mult(0.2));
@@ -131,7 +141,31 @@ function draw() {
   }
 
   for (let predator of predators) {
-    let force = predator.wander();
+    let force = createVector(0);
+    if (predator.target == null) {
+      if (random() < 0.001) {
+        predator.target = random(boids);
+        console.log("target acquired");
+        console.log(predator.target);
+      } else {
+        force = predator.wander();
+      }
+    } else {
+      if (
+        dist(
+          predator.position.x,
+          predator.position.y,
+          predator.target.position.x,
+          predator.target.position.y
+        ) < 100
+      ) {
+        console.log("Gotcha!");
+        predator.target = null;
+      } else {
+        force = predator.pursue(predator.target);
+      }
+    }
+
     // force.add(predator.edges().mult(0.2));
     predator.update(force);
     predator.wrap();

@@ -39,9 +39,7 @@ class Vehicle {
       fill("green");
       circle(position.x, position.y, 10);
     }
-    let steer = this.seek(position).mult(250);
-    let distance = p5.Vector.sub(this.position, position);
-    steer.div(distance.magSq() + 0.001);
+    let steer = this.seek(position);
     return steer;
   }
 
