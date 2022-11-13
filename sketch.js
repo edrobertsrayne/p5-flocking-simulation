@@ -60,8 +60,10 @@ function setup() {
   createFlock();
 
   let p = createVector(random(width), random(height));
-  let v = p5.Vector.random2D();
+  let v = p5.Vector.random2D().mult(2);
   let predator = new Predator(p, v);
+  predator.maxSpeed = 2;
+  predator.mass = 5;
   predators.push(predator);
 }
 
@@ -130,7 +132,7 @@ function draw() {
 
   for (let predator of predators) {
     let force = predator.wander();
-    force.add(predator.edges().mult(0.2));
+    // force.add(predator.edges().mult(0.2));
     predator.update(force);
     predator.wrap();
     predator.show();

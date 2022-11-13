@@ -3,9 +3,10 @@ class Vehicle {
     this.position = position;
     this.velocity = velocity;
     this.acceleration = createVector(0, 0);
-    this.maxSpeed = 5;
+    this.maxSpeed = 1;
     this.maxAcceleration = 0.2;
     this.mass = 1;
+    this.drift = this.velocity.copy().normalize();
   }
 
   wrap() {
@@ -49,27 +50,27 @@ class Vehicle {
   }
 
   wander() {
-    const maxDrift = 0.5;
-    const pathLenght = 100;
     const driftSize = 20;
+    const pathLength = 100;
 
-    let path = p5.Vector.mult(this.velocity, pathLenght);
-    let driftAngle = random(-maxDrift, maxDrift);
-    let drift = path.copy().normalize();
-    let driftfHeading = path.heading() + driftAngle;
-    drift.setHeading(driftfHeading);
-    drift.mult(driftSize);
+    this.drift.add(p5.Vector.random2D());
+    this.drift.normalize();
+    this.drift.mult(driftSize);
+
+    let path = this.velocity.copy();
+    path.setMag(pathLength);
+    path.add(this.position);
+
+    let target = p5.Vector.add(path, this.drift);
+
     if (debug) {
-      push();
-      translate(this.position.x, this.position.y);
+      noFill();
       stroke("cyan");
-      line(0, 0, path.x, path.y);
+      line(this.position.x, this.position.y, path.x, path.y);
+      line(path.x, path.y, target.x, target.y);
       circle(path.x, path.y, driftSize * 2);
-      line(path.x, path.y, path.x + drift.x, path.y + drift.y);
-      pop();
     }
-    let target = p5.Vector.add(path, this.position);
-    target.add(drift);
+
     return this.seek(target);
   }
 
@@ -82,14 +83,26 @@ class Vehicle {
 
     if (this.position.x < margin) {
       desired.add(this.maxSpeed, this.velocity.y);
+      if (this.drift.x < 0) {
+        this.drift.x = -this.drift.x;
+      }
     } else if (this.position.x > width - margin) {
       desired.add(-this.maxSpeed, this.velocity.y);
+      if (this.drift.x > 0) {
+        this.drift.x = -this.drift.x;
+      }
     }
 
     if (this.position.y < margin) {
       desired.add(this.velocity.x, this.maxSpeed);
+      if (this.drift.y < 0) {
+        this.drift.y = -this.drift.y;
+      }
     } else if (this.position.y > height - margin) {
       desired.add(this.velocity.x, -this.maxSpeed);
+      if (this.drift.y > 0) {
+        this.drift.y = -this.drift.y;
+      }
     }
 
     if (debug) {
@@ -109,7 +122,7 @@ class Vehicle {
     // update the position
     this.position.add(this.velocity);
     this.velocity.add(this.acceleration);
-    this.velocity.limit(1);
+    this.velocity.limit(this.maxSpeed);
     this.acceleration.mult(0);
   }
 }
