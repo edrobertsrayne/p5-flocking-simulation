@@ -2,7 +2,7 @@ const FLOCK_SIZE = 100;
 let boids = Array();
 let predators = Array();
 
-const debug = true;
+const debug = false;
 
 let flockSizeSlider;
 let perceptionSlider;
@@ -98,6 +98,11 @@ function draw() {
       boid.position.y,
       perceptionSlider.value()
     );
+    if (debug) {
+      noFill();
+      stroke(50);
+      circle(range.x, range.y, range.radius * 2);
+    }
     others = qtree.query(range);
 
     let force = createVector(0);
@@ -105,6 +110,18 @@ function draw() {
       force.add(boid.cohesion(others).mult(cohesionSlider.value()));
       force.add(boid.alignment(others).mult(alignmentSlider.value()));
       force.add(boid.separation(others).mult(separationSlider.value()));
+      if (debug) {
+        for (let other of others) {
+          noFill();
+          stroke(75);
+          line(
+            boid.position.x,
+            boid.position.y,
+            other.data.position.x,
+            other.data.position.y
+          );
+        }
+      }
     }
     /*
     // edge avoid
