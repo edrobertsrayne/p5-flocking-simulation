@@ -27,6 +27,27 @@ class Vehicle {
     return this.seek(target).mult(-1);
   }
 
+  pursue(target) {
+    console.assert(target instanceof Vehicle);
+
+    let position = target.position.copy();
+    position.add(target.velocity.copy().mult(50));
+
+    if (debug) {
+      stroke("green");
+      fill("green");
+      circle(position.x, position.y, 10);
+    }
+    let steer = this.seek(position).mult(250);
+    let distance = p5.Vector.sub(this.position, position);
+    steer.div(distance.magSq() + 0.001);
+    return steer;
+  }
+
+  flee(target) {
+    return this.pursue(target).mult(-1);
+  }
+
   wander() {
     const maxDrift = 0.5;
     const pathLenght = 100;

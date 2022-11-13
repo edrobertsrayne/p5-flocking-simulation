@@ -1,6 +1,7 @@
 class Predator extends Vehicle {
   constructor(position, velocity) {
     super(position, velocity);
+    this.target = null;
   }
 
   show() {

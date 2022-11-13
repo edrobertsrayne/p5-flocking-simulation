@@ -1,8 +1,8 @@
-const FLOCK_SIZE = 100;
+const FLOCK_SIZE = 50;
 let boids = Array();
 let predators = Array();
 
-const debug = false;
+const debug = true;
 
 let flockSizeSlider;
 let perceptionSlider;
@@ -93,6 +93,8 @@ function draw() {
   let mouseTarget = createVector(mouseX, mouseY);
 
   for (let boid of boids) {
+    let force = createVector(0);
+
     range = new Circle(
       boid.position.x,
       boid.position.y,
@@ -105,30 +107,18 @@ function draw() {
     }
     others = qtree.query(range);
 
-    let force = createVector(0);
+    // flocking behaviours
     if (others.length > 0) {
       force.add(boid.cohesion(others).mult(cohesionSlider.value()));
       force.add(boid.alignment(others).mult(alignmentSlider.value()));
       force.add(boid.separation(others).mult(separationSlider.value()));
-      if (debug) {
-        for (let other of others) {
-          noFill();
-          stroke(75);
-          line(
-            boid.position.x,
-            boid.position.y,
-            other.data.position.x,
-            other.data.position.y
-          );
-        }
-      }
     }
-    /*
-    // edge avoid
 
-    // mouse seek
-    boid.seek(mouseTarget, seekSlider.value());
-*/
+    for (let predator of predators) {
+      force.add(boid.flee(predator));
+    }
+    // edge avoid and seek
+    //force.add(boid.edges().mult(0.2));
     if (seekSlider.value() != 0) {
       force.add(boid.seek(mouseTarget).mult(seekSlider.value()));
     }
