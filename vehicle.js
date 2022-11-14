@@ -7,7 +7,7 @@ class Vehicle {
     this.maxAcceleration = 0.5;
     this.mass = 1;
     this.drift = this.velocity.copy().normalize();
-    this.radius = 5;
+    this.radius = 10;
   }
 
   wrap() {
@@ -81,18 +81,65 @@ class Vehicle {
     return this.seek(target);
   }
 
-  collision(obstacles) {
-    let path = this.velocity.copy().mult(200);
+  collision(obstacle) {
+    // project the vehicle's path into the future
+    let path = this.velocity.copy().mult(100);
+    //path.add(this.position);
     if (debug) {
-      stroke("green");
-      push();
-      translate(this.position.x, this.position.y);
-      rotate(this.velocity.heading());
-      rect(0, -this.radius, path.mag(), this.radius * 2);
-      pop();
+      stroke("rgba(255, 255, 0,0.25)");
+      strokeWeight(this.radius);
+      line(
+        this.position.x,
+        this.position.y,
+        this.position.x + path.x,
+        this.position.y + path.y
+      );
     }
+
+    // find the scalar projection of the obstacle's position onto the vehicle's path
+    let a = p5.Vector.sub(obstacle.position, this.position);
+    if (debug) {
+      stroke(255);
+      strokeWeight(1);
+      line(obstacle.x, obstacle.y, this.position.x, this.position.y);
+    }
+
+    // calculate the scalar projection
+    let b = path.copy();
+    b.normalize();
+    let sp = a.dot(b);
+
+    // if the scalar projection falls on the path keep checking
+    if (sp >= 0 && sp < path.mag()) {
+      // calculate the vector projection
+      b.mult(sp);
+      let vp = p5.Vector.add(this.position, b);
+
+      if (debug) {
+        stroke(255, 255, 0);
+        strokeWeight(4);
+        point(vp.x, vp.y);
+        strokeWeight(1);
+        stroke(255);
+        line(vp.x, vp.y, obstacle.x, obstacle.y);
+      }
+
+      if (
+        dist(obstacle.x, obstacle.y, vp.x, vp.y) <
+        obstacle.radius + this.radius
+      ) {
+        if (debug) {
+          console.log("Avoid collision!");
+        }
+        return this.avoid(obstacle.position);
+      }
+    }
+
+    return createVector(0);
+
     return createVector(0);
   }
+
   edges(margin) {
     if (margin === undefined) {
       margin = 50;

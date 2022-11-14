@@ -14,13 +14,16 @@ let edgeAvoidSlider;
 let resetButton;
 let seekSlider;
 
+let dragObject = null;
+
 let sliders = [];
 
 function createObstacle() {
   let x = random(0, width);
   let y = random(0, height);
-  let r = random(50, 200);
-  return new Obstacle(x, y, r);
+  let r = random(10, 50);
+  //return new Obstacle(x, y, r);
+  return new Obstacle(width / 2, height / 2, 50);
 }
 
 function createBoid() {
@@ -126,6 +129,30 @@ function draw() {
   text(frameRate().toFixed(2), width - 50, 30 + resetButton.size().height);
 }
 
+function mousePressed() {
+  for (let obstacle of obstacles) {
+    if (dist(mouseX, mouseY, obstacle.x, obstacle.y) < obstacle.radius) {
+      if (debug) {
+        console.log("Obstacle grabbed.");
+      }
+      dragObject = obstacle;
+      dragObject.offsetX = dragObject.x - mouseX;
+      dragObject.offsetY = dragObject.y - mouseY;
+      return;
+    }
+  }
+}
+
+function mouseReleased() {
+  dragObject = null;
+}
+
+function mouseDragged() {
+  if (dragObject) {
+    dragObject.move(mouseX + dragObject.offsetX, mouseY + dragObject.offsetY);
+  }
+}
+
 function calculateBoids() {
   // build a quadtree for this loop and populate it
   let boundary = new Rectangle(width / 2, height / 2, width / 2, height / 2);
@@ -193,7 +220,17 @@ function calculatePredators() {
   for (let predator of predators) {
     let force = createVector(0);
 
-    force = predator.collision(obstacles);
+    for (let o of obstacles) {
+      force.add(predator.collision(o));
+    }
+
+    if (force.magSq > 0) {
+      force.mult(5);
+      predator.update(force);
+      predator.wrap();
+      predator.show();
+      return;
+    }
 
     if (predator.target == null) {
       // if I don't have a target, 0.1% chance of acquiring one otherwise keep wandering
@@ -204,7 +241,7 @@ function calculatePredators() {
           console.log(boids.indexOf(predator.target));
         }
       } else {
-        force = predator.wander();
+        force.add(predator.wander());
       }
     } else {
       // if close enough (half feeding range) consume the boid otherwise continue the chase
