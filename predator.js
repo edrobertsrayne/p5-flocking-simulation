@@ -29,7 +29,7 @@ class Predator extends Vehicle {
   update(force) {
     let maxSpeed;
     if (this.target != null) {
-      this.maxSpeed = this.defaultMaxSpeed * 2;
+      this.maxSpeed = this.defaultMaxSpeed * 1.5;
     } else {
       this.maxSpeed = this.defaultMaxSpeed;
     }
@@ -48,13 +48,11 @@ class Predator extends Vehicle {
 
   huntPrey() {
     if (this.target == null) {
-      // if I don't have a target, 0.1% chance of acquiring one otherwise keep wandering
-      if (random() < 0.001) {
-        this.target = random(boids);
-        if (debug) {
-          console.log("Target acquired");
-          console.log(boids.indexOf(this.target));
-        }
+      // if I don't have a target, 0.1% chance of acquiring one
+      this.target = random(boids);
+      if (debug) {
+        console.log("Target acquired");
+        console.log(boids.indexOf(this.target));
       }
     } else {
       // if close enough (half feeding range) consume the boid otherwise continue the chase
@@ -74,6 +72,7 @@ class Predator extends Vehicle {
         flockSizeSlider.value(boids.length);
         this.target = null;
       } else {
+        // keep chasing
         return this.pursue(this.target);
       }
     }
