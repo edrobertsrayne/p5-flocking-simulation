@@ -136,8 +136,6 @@ class Vehicle {
     }
 
     return createVector(0);
-
-    return createVector(0);
   }
 
   edges(margin) {
@@ -186,9 +184,10 @@ class Vehicle {
     this.acceleration.limit(this.maxAcceleration);
 
     // update the position
-    this.position.add(this.velocity);
     this.velocity.add(this.acceleration);
     this.velocity.limit(this.maxSpeed);
+    this.position.add(this.velocity);
+
     this.acceleration.mult(0);
   }
 }

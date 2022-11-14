@@ -218,55 +218,23 @@ function calculateBoids() {
 
 function calculatePredators() {
   for (let predator of predators) {
-    let force = createVector(0);
+    // avoid obstacles
+    let dodge = predator.avoidObstacles();
+    dodge.mult(1);
 
-    for (let o of obstacles) {
-      force.add(predator.collision(o));
-    }
-
-    if (force.magSq > 0) {
-      force.mult(5);
-      predator.update(force);
-      predator.wrap();
-      predator.show();
-      return;
-    }
-
-    if (predator.target == null) {
-      // if I don't have a target, 0.1% chance of acquiring one otherwise keep wandering
-      if (random() < 0.001) {
-        predator.target = random(boids);
-        if (debug) {
-          console.log("target acquired");
-          console.log(boids.indexOf(predator.target));
-        }
-      } else {
-        force.add(predator.wander());
-      }
+    if (dodge.mag() > 0) {
+      // only avoid obstacles if present
+      predator.update(dodge);
     } else {
-      // if close enough (half feeding range) consume the boid otherwise continue the chase
-      if (
-        dist(
-          predator.position.x,
-          predator.position.y,
-          predator.target.position.x,
-          predator.target.position.y
-        ) <
-        predator.feedingRadius / 2
-      ) {
-        if (debug) {
-          console.log("Gotcha!");
-        }
-        boids.splice(boids.indexOf(predator.target), 1);
-        flockSizeSlider.value(boids.length);
-        predator.target = null;
-      } else {
-        force = predator.pursue(predator.target);
-      }
+      // hunt prey
+      let prey = predator.huntPrey();
+      predator.update(prey);
+
+      // wander
+      let wander = predator.wander();
+      predator.update(wander);
     }
 
-    // update and display the predator
-    predator.update(force);
     predator.wrap();
     predator.show();
   }
