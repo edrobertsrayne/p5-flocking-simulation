@@ -168,37 +168,32 @@ function calculateBoids() {
   let mouseTarget = createVector(mouseX, mouseY);
 
   for (let boid of boids) {
-    let force = createVector(0);
+    let force = boid.avoidObstacles();
 
-    // find the nearby boids to use in flocking calculations
-    range = new Circle(
-      boid.position.x,
-      boid.position.y,
-      perceptionSlider.value()
-    );
-    if (debug) {
-      noFill();
-      stroke(50);
-      circle(range.x, range.y, range.radius * 2);
+    if (force.magSq() == 0) {
+      // if there's a predator nearby, run away!
+      force = boid.fleePredators();
     }
-    others = qtree.query(range);
+    if (force.magSq() == 0) {
+      // find the nearby boids to use in flocking calculations
+      range = new Circle(
+        boid.position.x,
+        boid.position.y,
+        perceptionSlider.value()
+      );
+      if (debug) {
+        noFill();
+        stroke(50);
+        circle(range.x, range.y, range.radius * 2);
+      }
+      others = qtree.query(range);
 
-    // avoid obstacles
-
-    dodge = boid.avoidObstacles();
-    dodge.mult(100);
-    force.add(dodge);
-
-    // if there's a predator nearby, run away!
-    p = boid.fleePredators();
-    p.mult(10);
-    force.add(p);
-
-    // otherwise calculate flocking behaviours
-    if (others.length > 0) {
-      force.add(boid.cohesion(others).mult(cohesionSlider.value()));
-      force.add(boid.alignment(others).mult(alignmentSlider.value()));
-      force.add(boid.separation(others).mult(separationSlider.value()));
+      // otherwise calculate flocking behaviours
+      if (others.length > 0) {
+        force.add(boid.cohesion(others).mult(cohesionSlider.value()));
+        force.add(boid.alignment(others).mult(alignmentSlider.value()));
+        force.add(boid.separation(others).mult(separationSlider.value()));
+      }
     }
 
     // edge avoid and seek
@@ -215,17 +210,13 @@ function calculateBoids() {
 
 function calculatePredators() {
   for (let predator of predators) {
-    // avoid obstacles
-    let dodge = predator.avoidObstacles();
-    dodge.mult(100);
-
-    let prey = predator.huntPrey();
-    prey.mult(10);
-    let wander = predator.wander();
-
-    let force = dodge;
-    force.add(prey);
-    force.add(wander);
+    let force = predator.avoidObstacles();
+    if (force.magSq() == 0) {
+      force = predator.huntPrey();
+    }
+    if (force.magSq() == 0) {
+      force = predator.wander();
+    }
 
     predator.update(force);
     predator.wrap();
