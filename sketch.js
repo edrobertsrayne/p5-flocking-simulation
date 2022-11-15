@@ -1,4 +1,6 @@
 const FLOCK_SIZE = 50;
+const NUM_OBSTACLES = 10;
+
 let boids = Array();
 let predators = Array();
 let obstacles = Array();
@@ -18,12 +20,13 @@ let dragObject = null;
 
 let sliders = [];
 
-function createObstacle() {
-  let x = random(0, width);
-  let y = random(0, height);
-  let r = random(10, 50);
-  //return new Obstacle(x, y, r);
-  return new Obstacle(width / 2, height / 2, 50);
+function createObstacles() {
+  for (let i = 0; i < NUM_OBSTACLES; i++) {
+    let x = random(0, width);
+    let y = random(0, height);
+    let r = random(10, width / 20);
+    obstacles.push(new Obstacle(x, y, r));
+  }
 }
 
 function createBoid() {
@@ -78,7 +81,7 @@ function setup() {
 
   createFlock();
 
-  obstacles.push(createObstacle());
+  createObstacles();
 
   let p = createVector(random(width), random(height));
   let v = p5.Vector.random2D().mult(2);

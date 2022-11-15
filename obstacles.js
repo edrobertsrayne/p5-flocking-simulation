@@ -8,6 +8,12 @@ class Obstacle {
     this.offsetX = 0;
     this.offsetY = 0;
     this.position = createVector(x, y);
+    this.colour = this.setColour();
+  }
+
+  setColour() {
+    const colours = ["indigo", "mediumpurple", "cornflowerblue", "darkslateblue", "orchid", "steelblue"];
+    return random(colours);
   }
 
   move(x, y) {
@@ -18,8 +24,10 @@ class Obstacle {
 
   show() {
     strokeWeight(1);
-    stroke("mediumpurple");
-    fill("indigo");
+    let c = color(this.colour);
+    stroke(c);
+    c.setAlpha(128);
+    fill(c);
     circle(this.x, this.y, this.diameter);
   }
 }
