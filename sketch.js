@@ -180,25 +180,19 @@ function calculateBoids() {
     }
     others = qtree.query(range);
 
+    // avoid obstacles
+
+    dodge = boid.avoidObstacles();
+    dodge.mult(100);
+    force.add(dodge);
+
     // if there's a predator nearby, run away!
-    let runAway = false;
-    for (let predator of predators) {
-      if (
-        dist(
-          boid.position.x,
-          boid.position.y,
-          predator.position.x,
-          predator.position.y
-        ) < predator.feedingRadius
-      ) {
-        force.add(boid.flee(predator));
-        force.add(boid.avoid(predator.position).mult(2));
-        runAway = true;
-      }
-    }
+    p = boid.fleePredators();
+    p.mult(10);
+    force.add(p);
 
     // otherwise calculate flocking behaviours
-    if (others.length > 0 && runAway == false) {
+    if (others.length > 0) {
       force.add(boid.cohesion(others).mult(cohesionSlider.value()));
       force.add(boid.alignment(others).mult(alignmentSlider.value()));
       force.add(boid.separation(others).mult(separationSlider.value()));
@@ -220,21 +214,17 @@ function calculatePredators() {
   for (let predator of predators) {
     // avoid obstacles
     let dodge = predator.avoidObstacles();
-    dodge.mult(1);
+    dodge.mult(100);
 
-    if (dodge.mag() > 0) {
-      // only avoid obstacles if present
-      predator.update(dodge);
-    } else {
-      // hunt prey
-      let prey = predator.huntPrey();
-      predator.update(prey);
+    let prey = predator.huntPrey();
+    prey.mult(10);
+    let wander = predator.wander();
 
-      // wander
-      let wander = predator.wander();
-      predator.update(wander);
-    }
+    let force = dodge;
+    force.add(prey);
+    force.add(wander);
 
+    predator.update(force);
     predator.wrap();
     predator.show();
   }

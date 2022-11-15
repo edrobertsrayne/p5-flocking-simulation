@@ -63,6 +63,34 @@ class Boid extends Vehicle {
     return p5.Vector.sub(desired, this.velocity);
   }
 
+  avoidObstacles() {
+    let force = createVector(0);
+
+    for (let o of obstacles) {
+      force.add(this.collision(o));
+    }
+
+    return force;
+  }
+
+  fleePredators() {
+    let force = createVector(0);
+    for (let predator of predators) {
+      if (
+        dist(
+          this.position.x,
+          this.position.y,
+          predator.position.x,
+          predator.position.y
+        ) < predator.feedingRadius
+      ) {
+        force.add(this.flee(predator));
+        force.add(this.avoid(predator.position).mult(2));
+      }
+    }
+    return force;
+  }
+
   show() {
     strokeWeight(1);
     stroke(255);
